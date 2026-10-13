@@ -103,10 +103,10 @@ h1, h2 { text-wrap: balance; margin: 0; }
 .tab { min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); font: 700 16px var(--font-body); cursor: pointer; }
 .tab[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 .tab:disabled { border-style: dashed; border-color: var(--muted-bd); color: var(--ink-soft); cursor: default; }
-.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 20px; }
 .unit { text-decoration: none; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 20px 22px; box-shadow: 4px 4px 0 var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 84px; }
-.unit-name { font-size: 22px; font-weight: 900; }
-.unit-count { font-family: var(--font-num); font-size: 14px; color: var(--ink-soft); }
+.unit-name { font-size: 22px; font-weight: 900; white-space: nowrap; }
+.unit-count { white-space: nowrap; font-family: var(--font-num); font-size: 14px; color: var(--ink-soft); }
 .summary-btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border: 2px solid var(--ink); border-radius: 999px; background: var(--marker); color: #1E2A4A; text-decoration: none; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
 .sheet { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 22px; box-shadow: 6px 6px 0 var(--ink); display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 32px; }
 .row { display: flex; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px dashed var(--rule); min-width: 0; }
@@ -1106,12 +1106,16 @@ body.locked { overflow: hidden; }
         var item = b.closest('.item');
         var kind = b.getAttribute('data-kind');
         var open = b.getAttribute('aria-expanded') !== 'true';
-        item.querySelectorAll('.tg').forEach(function (o) { o.setAttribute('aria-expanded', 'false'); });
-        item.querySelectorAll('.panel').forEach(function (p) { p.hidden = true; });
+        // 開くのはページ全体で 1 つだけ（ほかの番号のパネルも閉じる）。上のパネルが閉じて押したボタンが動かないよう，位置をもどす
+        var top = b.getBoundingClientRect().top;
+        app.querySelectorAll('.tg').forEach(function (o) { o.setAttribute('aria-expanded', 'false'); });
+        app.querySelectorAll('.panel').forEach(function (p) { p.hidden = true; });
         if (open) {
           b.setAttribute('aria-expanded', 'true');
           item.querySelector('.panel[data-kind="' + kind + '"]').hidden = false;
         }
+        var shift = b.getBoundingClientRect().top - top;
+        if (shift) window.scrollBy(0, shift);
       });
     });
     app.querySelectorAll('.chip[data-step]').forEach(function (c) {
