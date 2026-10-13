@@ -1,0 +1,1391 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231E2A4A'/%3E%3Ctext x='16' y='23' font-size='22' font-family='monospace' font-weight='bold' text-anchor='middle' fill='%23FFD84D'%3E%C2%B1%3C/text%3E%3C/svg%3E">
+<title>はやし数学ポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 方眼ノートの上に、紺の枠線と黄色マーカーのカード。ポータル → 学年・単元 → 番号ごとに「問題」「解説」 */
+:root {
+  --paper: #FBFCFE;
+  --grid: #E6ECF5;
+  --ink: #1E2A4A;
+  --ink-soft: #4A5878;
+  --card: #FFFFFF;
+  --marker: #FFD84D;
+  --on-ink: #FFFFFF;
+  --rule: #C9D2E3;
+  --muted-bd: #A9B3C9;
+  --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  --font-num: 'IBM Plex Mono', ui-monospace, 'Menlo', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121A2E; --grid: #1C2742; --ink: #E8EDF8; --ink-soft: #A8B4CF;
+    --card: #19233C; --marker: #F2CC3D; --on-ink: #121A2E; --rule: #33416A; --muted-bd: #4A587E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121A2E; --grid: #1C2742; --ink: #E8EDF8; --ink-soft: #A8B4CF;
+  --card: #19233C; --marker: #F2CC3D; --on-ink: #121A2E; --rule: #33416A; --muted-bd: #4A587E;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  min-height: 100vh;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 56px; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; box-shadow: 0 0 0 6px var(--marker); }
+.v-kindbtn:focus-visible { outline-offset: -5px; box-shadow: none; }
+h1, h2 { text-wrap: balance; margin: 0; }
+.mark { background: linear-gradient(transparent 58%, var(--marker) 58%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mark { background: linear-gradient(transparent 88%, var(--marker) 88%); } }
+:root[data-theme="dark"] .mark { background: linear-gradient(transparent 88%, var(--marker) 88%); }
+.brand { display: flex; align-items: center; gap: 12px; padding-block: 8px 20px; }
+.logo { width: 44px; height: 44px; border-radius: 10px; background: #1E2A4A; color: #FFD84D; display: grid; place-items: center; font-family: var(--font-num); font-weight: 600; font-size: 22px; flex-shrink: 0; }
+.brand-name { font-weight: 900; font-size: 22px; letter-spacing: 0.04em; }
+.brand-sub { font-size: 13px; color: var(--ink-soft); }
+.back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; text-decoration: none; font-size: 15px; }
+.back svg { width: 18px; height: 18px; }
+
+/* Portal */
+.hero h1 { font-size: clamp(30px, 5vw, 40px); font-weight: 900; line-height: 1.35; }
+.hero p { margin: 6px 0 32px; color: var(--ink-soft); font-size: 17px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; }
+.card {
+  text-decoration: none; background: var(--card); border: 2px solid var(--ink); border-radius: 16px;
+  padding: 28px; display: flex; flex-direction: column; gap: 18px; box-shadow: 6px 6px 0 var(--ink);
+  min-height: 280px; transition: transform .12s ease, box-shadow .12s ease;
+}
+.card.yellow { background: var(--marker); color: #1E2A4A; }
+.card.yellow .card-desc { color: #1E2A4A; }
+.card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.card:active { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--ink); }
+.card-top { display: flex; justify-content: space-between; align-items: center; }
+.eyebrow { font-family: var(--font-num); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; }
+.card h2 { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+.card-desc { margin: 0; font-size: 17px; line-height: 1.7; color: var(--ink-soft); }
+.card-body { flex-grow: 1; }
+.pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; background: #1E2A4A; color: #FFFFFF; font-weight: 700; font-size: 18px; padding: 12px 24px; border-radius: 999px; min-height: 48px; }
+/* 計算王カード：ゲーム画面（濃紺・ネオン3色）に寄せる */
+.card.game { --g-bg: #12132F; --g-panel: #1A1C42; --g-text: #EEF0FF; --g-sub: #9DA3CF; --g-teal: #19D3C5; --g-indigo: #6D6BF2; --g-pink: #FF5C9E;
+  position: relative; overflow: hidden; background: var(--g-bg); color: var(--g-text); }
+.card.game::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, var(--g-teal), var(--g-indigo), var(--g-pink)); }
+.card.game .eyebrow { color: var(--g-sub); letter-spacing: 0.2em; }
+.card.game .card-top svg { color: var(--g-teal); }
+.card.game h2 { display: inline-flex; align-items: center; padding: 6px 22px; border: 1px solid rgba(255,255,255,0.28); border-radius: 999px; background: var(--g-panel); letter-spacing: 0.12em; font-size: 28px; }
+.card.game .card-desc { color: var(--g-sub); margin-top: 6px; }
+.g-grades { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.g-grade { display: inline-flex; align-items: center; gap: 6px; padding: 3px 12px 3px 3px; border-radius: 999px; background: var(--g-panel); border: 1px solid var(--c); font-size: 14px; font-weight: 700; color: var(--g-text); }
+.g-grade b { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #0B0C22; font: 700 13px var(--font-num); }
+.card.game .pill { background: rgba(25,211,197,0.14); color: var(--g-text); border: 1.5px solid var(--g-teal); box-shadow: 0 0 14px rgba(25,211,197,0.35); }
+
+/* Prints */
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.head h1 { font-size: clamp(28px, 4.5vw, 36px); font-weight: 900; }
+.grade-label { font-size: 18px; margin-right: 10px; color: var(--ink-soft); font-weight: 700; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.tab { min-height: 44px; padding: 0 20px; border-radius: 999px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); font: 700 16px var(--font-body); cursor: pointer; }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.tab:disabled { border-style: dashed; border-color: var(--muted-bd); color: var(--ink-soft); cursor: default; }
+.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+.unit { text-decoration: none; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 20px 22px; box-shadow: 4px 4px 0 var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 84px; }
+.unit-name { font-size: 22px; font-weight: 900; }
+.unit-count { font-family: var(--font-num); font-size: 14px; color: var(--ink-soft); }
+.summary-btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border: 2px solid var(--ink); border-radius: 999px; background: var(--marker); color: #1E2A4A; text-decoration: none; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
+.sheet { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 22px; box-shadow: 6px 6px 0 var(--ink); display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 32px; }
+.row { display: flex; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px dashed var(--rule); min-width: 0; }
+.no { font-family: var(--font-num); font-weight: 600; font-size: 19px; width: 96px; padding-left: 12px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.btn { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 17px; border: 2px solid var(--ink); }
+.btn.q { background: var(--ink); color: var(--on-ink); }
+.btn.a { background: var(--marker); color: #1E2A4A; }
+.btn.off { border-style: dashed; border-color: var(--muted-bd); color: var(--ink-soft); background: transparent; pointer-events: none; font-size: 14px; }
+.btn:active { transform: translateY(2px); }
+.item { border-bottom: 1px dashed var(--rule); padding-block: 8px; min-width: 0; }
+.item .row { border-bottom: 0; padding-block: 0; }
+button.btn { font: 700 17px var(--font-body); cursor: pointer; gap: 6px; }
+button.btn svg { width: 16px; height: 16px; transition: transform .15s ease; }
+button.btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.btn.q[aria-expanded="true"] { box-shadow: 0 0 0 3px var(--marker); }
+.btn.a[aria-expanded="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.panel { margin: 8px 0 2px; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--ink); display: flex; flex-direction: column; gap: 8px; }
+.panel.q { background: var(--paper); }
+.panel.a { background: color-mix(in srgb, var(--marker) 22%, var(--card)); }
+.panel-label { font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+.chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.chip { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 2px; border-radius: 10px; border: 2px solid var(--ink); text-decoration: none; font: 600 14px var(--font-num); letter-spacing: 0.04em; }
+.chip.q { background: var(--ink); color: var(--on-ink); }
+.chip.a { background: var(--marker); color: #1E2A4A; }
+.chip.all { background: var(--card); color: var(--ink); font-family: var(--font-body); font-weight: 700; }
+.chip.off { border-style: dashed; border-color: var(--muted-bd); color: var(--ink-soft); }
+.chip:active { transform: translateY(2px); }
+.item-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; min-width: 0; }
+.item-head .no { width: auto; padding-left: 0; font-size: 18px; }
+.topic { font-size: 15px; font-weight: 700; color: var(--ink-soft); overflow-wrap: anywhere; }
+button.chip { cursor: pointer; }
+.sum-row { display: flex; gap: 10px; flex-wrap: wrap; }
+body.locked { overflow: hidden; }
+.viewer { position: fixed; inset: 0; z-index: 50; background: var(--paper); display: flex; flex-direction: column; }
+.v-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: calc(6px + env(safe-area-inset-top, 0px)) 16px 6px; background: var(--card); border-bottom: 2px solid var(--ink); }
+.v-title { margin: 0; flex: 1 1 220px; min-width: 0; font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.v-no { font-family: var(--font-num); font-weight: 600; font-size: 18px; }
+.v-kind { font-family: var(--font-num); font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 2px solid var(--ink); }
+.v-kind.q { background: var(--ink); color: var(--on-ink); }
+.v-kind.a { background: var(--marker); color: #1E2A4A; }
+.v-switch { display: flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+.v-kindbtn { min-height: 44px; padding: 0 18px; border: 0; background: var(--card); color: var(--ink); font: 700 16px var(--font-body); cursor: pointer; }
+.v-kindbtn[aria-pressed="true"][data-kind="q"] { background: var(--ink); color: var(--on-ink); }
+.v-kindbtn[aria-pressed="true"][data-kind="a"] { background: var(--marker); color: #1E2A4A; }
+.v-kindbtn:disabled { color: var(--muted-bd); cursor: default; }
+.v-full { min-height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); font: 700 15px var(--font-body); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.v-full svg { width: 18px; height: 18px; }
+.v-full[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.v-close { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--ink); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.v-close svg { width: 20px; height: 20px; }
+.v-scroll { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 6px; display: flex; align-items: center; justify-content: center; }
+.v-scroll img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; background: #FFFFFF; border: 1px solid var(--rule); border-radius: 4px; }
+.v-nav { display: flex; align-items: stretch; gap: 8px; padding: 6px 16px 4px; background: var(--card); border-top: 2px solid var(--ink); }
+.v-steps { flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.v-pn { flex: 0 0 auto; min-height: 44px; padding: 0 14px; border-radius: 10px; border: 2px solid var(--ink); background: var(--marker); color: #1E2A4A; font: 700 15px var(--font-body); display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.v-pn svg { width: 18px; height: 18px; }
+.v-pn:disabled { background: var(--card); color: var(--muted-bd); border-color: var(--muted-bd); cursor: default; }
+.v-keys { margin: 0; padding: 0 16px calc(6px + env(safe-area-inset-bottom, 0px)); background: var(--card); font-size: 12px; color: var(--ink-soft); text-align: center; }
+.v-keys kbd { display: inline-block; min-width: 18px; padding: 0 4px; margin: 0 1px; border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; font: 600 11px var(--font-num); color: var(--ink); background: var(--paper); }
+@media (max-width: 720px) { .v-pn span, .v-keys { display: none; } .v-pn { padding: 0 10px; } .v-nav { padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); } }
+.v-step { min-height: 44px; border-radius: 10px; border: 2px solid var(--ink); background: var(--card); color: var(--ink); font: 600 15px var(--font-num); cursor: pointer; }
+.v-step[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.v-err { margin: auto; padding: 16px; font-weight: 700; color: var(--ink); text-align: center; }
+.v-rotate { display: none; }
+@media (max-width: 720px) and (orientation: portrait) {
+  .v-scroll { display: block; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom; }
+  .v-scroll img { max-width: none; max-height: none; width: 220%; }
+  .v-rotate { display: block; margin: 0; padding: 4px 16px; background: var(--marker); color: #1E2A4A; font-size: 12px; font-weight: 700; text-align: center; }
+}
+@media (max-height: 500px) {
+  .v-keys, .v-title, .v-full span, .v-pn span { display: none; }
+  .v-bar { padding-top: calc(2px + env(safe-area-inset-top, 0px)); padding-bottom: 2px; justify-content: flex-end; }
+  .v-nav { padding-top: 3px; padding-bottom: calc(3px + env(safe-area-inset-bottom, 0px)); }
+  .v-kindbtn, .v-step, .v-pn, .v-full { min-height: 40px; }
+  .v-close { width: 40px; height: 40px; }
+  .v-scroll { display: block; overflow: auto; -webkit-overflow-scrolling: touch; }
+  .v-scroll img { max-width: none; max-height: none; width: 100%; }
+}
+/* 印刷：ボタンを押すと「このSTEPだけ」「STEP1〜4まとめて」を選ぶメニュー。印刷用の画像は #print-area に入れて，1 STEP を A4 1 枚に収める */
+.v-bar { position: relative; }
+.v-pmenu { position: absolute; right: 16px; top: calc(100% + 6px); max-width: calc(100% - 32px); z-index: 2; width: 220px; padding: 6px; background: var(--card); border: 2px solid var(--ink); border-radius: 12px; box-shadow: 4px 4px 0 var(--ink); display: flex; flex-direction: column; gap: 6px; }
+.v-pmenu button { min-height: 48px; padding: 4px 14px; border: 2px solid var(--ink); border-radius: 10px; background: var(--card); color: var(--ink); font: 700 15px var(--font-body); text-align: left; cursor: pointer; }
+.v-pmenu button small { display: block; font-size: 12px; font-weight: 500; color: var(--ink-soft); }
+.v-pmenu button:hover { background: color-mix(in srgb, var(--marker) 30%, var(--card)); }
+.v-full[aria-disabled="true"] { cursor: progress; opacity: .6; }
+@media (max-width: 480px) { .v-full span { display: none; } .v-full { padding: 0 11px; } }
+#print-area { display: none; }
+@media print {
+  /* プリントは横長なので A4 横（縦長の画像なら A4 縦）。1 STEP を 1 枚に収める */
+  @page { size: A4 portrait; margin: 8mm; }
+  @page land { size: A4 landscape; margin: 8mm; }
+  html, body.printing { background: #FFFFFF !important; overflow: visible !important; min-height: 0 !important; height: auto !important; }
+  body.printing > *:not(#print-area) { display: none !important; }
+  body.printing #print-area { display: block; }
+  .pp { --ph: 278mm; height: var(--ph); display: flex; align-items: flex-start; justify-content: center; break-after: page; page-break-after: always; break-inside: avoid; }
+  .pp.land { --ph: 191mm; page: land; }
+  .pp:last-child { break-after: auto; page-break-after: auto; }
+  .pp img { display: block; max-width: 100%; height: auto; object-fit: cover; }
+}
+.hint { font-size: 13px; color: var(--ink-soft); margin: 0 0 12px; }
+.note { margin-top: 18px; color: var(--ink-soft); font-size: 14px; }
+.empty { padding: 28px; text-align: center; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce) { .card, .btn { transition: none; } .card:hover, .card:active, .btn:active { transform: none; } }
+</style>
+</head>
+<body>
+
+<script id="site-data" type="application/json">
+{
+ "updated": "2026-10-12",
+ "keisanouUrl": "https://script.google.com/macros/s/AKfycbwdVa45DXeeKQowfIZ1bvT6kVloblz-O3ykn0sSTDREudWZ1hSgZv9bHA4_izCfsCgWUA/exec",
+ "grades": [
+  {
+   "id": "1",
+   "name": "中1",
+   "units": [
+    {
+     "id": "sosu",
+     "sprite": true,
+     "name": "素数",
+     "img": "p/sosu",
+     "items": [
+      {
+       "no": 1,
+       "topic": "自然数と素数",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 2,
+       "topic": "素因数分解",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 3,
+       "topic": "素因数分解と約数・倍数",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "seifu",
+     "sprite": true,
+     "name": "正負の数",
+     "items": [
+      {
+       "no": 4,
+       "topic": "符号のついた数",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 5,
+       "topic": "反対の性質をもつ量",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 6,
+       "topic": "数直線",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 7,
+       "topic": "数の大小",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 8,
+       "topic": "絶対値",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 9,
+       "topic": "正負の数の加法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 10,
+       "topic": "小数・分数の加法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 11,
+       "topic": "いくつかの数の加法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 12,
+       "topic": "正負の数の減法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 13,
+       "topic": "小数・分数の減法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 14,
+       "topic": "加法と減法の混じった式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 15,
+       "topic": "加減の混じった計算",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 16,
+       "topic": "正負の数の乗法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 17,
+       "topic": "いくつかの数の乗法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 18,
+       "topic": "累乗",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 19,
+       "topic": "正負の数の除法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 20,
+       "topic": "逆数と除法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 21,
+       "topic": "乗法と除法の混じった計算",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 22,
+       "topic": "四則の混じった計算",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 23,
+       "topic": "分配法則",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 24,
+       "topic": "数の範囲と四則",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 25,
+       "topic": "正負の数の利用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ],
+     "img": "p/seifu"
+    },
+    {
+     "id": "moji",
+     "sprite": true,
+     "name": "文字と式",
+     "items": [
+      {
+       "no": 26,
+       "topic": "文字の使用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 27,
+       "topic": "積の表し方",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 28,
+       "topic": "1 や負の数との積・累乗の表し方",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 29,
+       "topic": "商の表し方",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 30,
+       "topic": "いろいろな数量の表し方",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 31,
+       "topic": "円周率・式が表す数量",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 32,
+       "topic": "代入と式の値",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 33,
+       "topic": "2 つの文字の式の値",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 34,
+       "topic": "項と係数・1 次式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 35,
+       "topic": "同類項をまとめる",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 36,
+       "topic": "1 次式の加法と減法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 37,
+       "topic": "1 次式と数の乗法・除法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 38,
+       "topic": "かっこのある 1 次式と数の乗法",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 39,
+       "topic": "1 次式と数の除法・分数の形の式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 40,
+       "topic": "かっこをはずして計算",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 41,
+       "topic": "棒の本数を求めよう",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 42,
+       "topic": "数の表し方",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 43,
+       "topic": "等式と不等式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 44,
+       "topic": "等式・不等式の読み取り",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ],
+     "img": "p/moji"
+    },
+    {
+     "id": "houtei",
+     "sprite": true,
+     "name": "方程式",
+     "img": "p/houtei",
+     "items": [
+      {
+       "no": 45,
+       "topic": "方程式とその解",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 46,
+       "topic": "等式の性質（加える・ひく）",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 47,
+       "topic": "等式の性質（かける・わる）",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 48,
+       "topic": "移項",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 49,
+       "topic": "方程式を解く手順",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 50,
+       "topic": "かっこのある方程式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 51,
+       "topic": "係数に小数をふくむ方程式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 52,
+       "topic": "係数に分数をふくむ方程式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 53,
+       "topic": "1次方程式の利用（代金）",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 54,
+       "topic": "速さの問題・解が問題に適しているか",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 55,
+       "topic": "過不足の問題",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 56,
+       "topic": "間隔は何cm？",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 57,
+       "topic": "比例式とその性質",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 58,
+       "topic": "比例式の利用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ]
+    },
+    {
+     "id": "hirei",
+     "name": "比例と反比例",
+     "img": "p/hirei",
+     "items": [
+      {
+       "no": 59,
+       "topic": "関数",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 60,
+       "topic": "変数と変域",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 61,
+       "topic": "比例",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 62,
+       "topic": "反比例",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 63,
+       "topic": "比例の性質",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 64,
+       "topic": "比例の式を求める",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 65,
+       "topic": "座標",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 66,
+       "topic": "比例のグラフ",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 67,
+       "topic": "比例の表・グラフから式を求める",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 68,
+       "topic": "反比例の性質と式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 69,
+       "topic": "反比例のグラフ",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 70,
+       "topic": "反比例の表・グラフと式",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 71,
+       "topic": "比例の利用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 72,
+       "topic": "反比例の利用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 73,
+       "topic": "グラフの利用",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ],
+     "sprite": true
+    },
+    {
+     "id": "heimen",
+     "name": "平面図形",
+     "img": "p/heimen",
+     "items": [
+      {
+       "no": 74,
+       "topic": "直線と線分・平行移動",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 75,
+       "topic": "回転移動",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 76,
+       "topic": "対称移動",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 77,
+       "topic": "いろいろな移動と合同",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 78,
+       "topic": "作図のしかた",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 79,
+       "topic": "交わる 2 つの円の性質",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 80,
+       "topic": "垂線の作図",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 81,
+       "topic": "点と直線の距離",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 82,
+       "topic": "垂直二等分線の作図",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 83,
+       "topic": "角の二等分線の作図",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 84,
+       "topic": "円の接線・いろいろな作図",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 85,
+       "topic": "おうぎ形",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      },
+      {
+       "no": 86,
+       "topic": "おうぎ形の弧の長さと面積",
+       "pages": {
+        "q": 4,
+        "a": 4
+       }
+      }
+     ],
+     "sprite": true
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "name": "中2",
+   "units": []
+  },
+  {
+   "id": "3",
+   "name": "中3",
+   "units": []
+  }
+ ]
+}
+</script>
+
+<div class="wrap" id="app"></div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="v-title" hidden>
+  <div class="v-bar">
+    <p class="v-title" id="v-title" aria-live="polite"></p>
+    <div class="v-switch" role="group" aria-label="問題と解説">
+      <button type="button" class="v-kindbtn" data-kind="q">問題</button>
+      <button type="button" class="v-kindbtn" data-kind="a">解説</button>
+    </div>
+    <span class="v-pwrap">
+      <button type="button" class="v-full" id="v-print" aria-label="印刷" aria-expanded="false" aria-controls="v-pmenu" title="印刷（P）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span>印刷</span></button>
+      <span class="v-pmenu" id="v-pmenu" role="group" aria-label="印刷するはんい" hidden>
+        <button type="button" data-print="step">このSTEPだけ<small>いま見ているページを 1 枚</small></button>
+        <button type="button" data-print="all">STEP1〜4 まとめて<small>この回の問題（解説）を全部</small></button>
+      </span>
+    </span>
+    <button type="button" class="v-full" id="v-full" aria-pressed="false" title="全画面（F）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>全画面</span></button>
+    <button type="button" class="v-close" id="v-close" aria-label="とじる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="v-scroll" id="v-scroll"><img id="v-img" alt=""><p class="v-err" id="v-err" hidden>画像を読み込めませんでした。通信を確認して、もう一度STEPを押してください。</p></div>
+  <p class="v-rotate">横向きで全体表示・指で拡大できます</p>
+  <div class="v-nav">
+    <button type="button" class="v-pn" id="v-prev" title="前のプリント（↑）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span>前のプリント</span></button>
+    <div class="v-steps" id="v-steps" role="group" aria-label="STEP"></div>
+    <button type="button" class="v-pn" id="v-next" title="次のプリント（↓）"><span>次のプリント</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>1</kbd>〜<kbd>4</kbd> STEP　<kbd>P</kbd> 印刷　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
+</div>
+
+<div id="print-area" aria-hidden="true"></div>
+
+<script>
+(function () {
+  var data = JSON.parse(document.getElementById('site-data').textContent);
+  var app = document.getElementById('app');
+  var state = { grade: '1' };
+  try { var g = localStorage.getItem('grade'); if (g && data.grades.some(function (x) { return x.id === g && x.units.length; })) state.grade = g; } catch (e) {}
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  var arrow = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  var backIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>';
+  var brand = '<div class="brand"><div class="logo" aria-hidden="true">±</div><div><div class="brand-name">はやし数学ポータル</div><div class="brand-sub">中学数学</div></div></div>';
+
+  function findUnit(id) {
+    for (var i = 0; i < data.grades.length; i++) {
+      var us = data.grades[i].units;
+      for (var j = 0; j < us.length; j++) if (us[j].id === id) return { grade: data.grades[i], unit: us[j] };
+    }
+    return null;
+  }
+
+  function home() {
+    var arrowGame = arrow.replace('stroke="#FFD84D"', 'stroke="#19D3C5"');
+    var game = '<a class="card game" href="' + (data.keisanouUrl ? esc(data.keisanouUrl) + '" target="_blank" rel="noopener' : '#') + '">';
+    app.innerHTML = brand +
+      '<section class="hero"><h1><span class="mark">学ぶ。解く。伸びる。</span></h1><p>カードをタップしてスタート</p></section>' +
+      '<div class="cards">' +
+        '<a class="card yellow" href="#prints">' +
+          '<div class="card-top"><span class="eyebrow">PRINT</span><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6M10 17h4"/></svg></div>' +
+          '<div class="card-body"><h2>授業プリント</h2><p class="card-desc">問題と解説をすぐに確認</p></div>' +
+          '<span class="pill">ひらく ' + arrow + '</span>' +
+        '</a>' +
+        game +
+          '<div class="card-top"><span class="eyebrow">GAME</span><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18h16l-1.5-9-4.5 4-2-6-2 6-4.5-4z"/><path d="M4 21h16"/></svg></div>' +
+          '<div class="card-body"><h2>計算王</h2><p class="card-desc">計算で勝負しよう</p>' +
+            '<div class="g-grades" aria-hidden="true">' +
+              '<span class="g-grade" style="--c:#19D3C5"><b>1</b>中1</span>' +
+              '<span class="g-grade" style="--c:#6D6BF2"><b>2</b>中2</span>' +
+              '<span class="g-grade" style="--c:#FF5C9E"><b>3</b>中3</span>' +
+            '</div></div>' +
+          '<span class="pill">あそぶ ' + arrowGame + '</span>' +
+        '</a>' +
+      '</div>';
+  }
+
+  function prints() {
+    var tabs = data.grades.map(function (g) {
+      var has = g.units.length > 0;
+      return '<button type="button" class="tab" data-grade="' + esc(g.id) + '" aria-pressed="' + (g.id === state.grade) + '"' + (has ? '' : ' disabled') + '>' + esc(g.name) + (has ? '' : ' 準備中') + '</button>';
+    }).join('');
+    var grade = data.grades.filter(function (g) { return g.id === state.grade; })[0] || data.grades[0];
+    var units = grade.units.length
+      ? '<div class="units">' + grade.units.map(function (u) {
+          return '<a class="unit" href="#u-' + esc(u.id) + '"><span class="unit-name">' + esc(u.name) + '</span><span class="unit-count">No.' + u.items[0].no + '–' + u.items[u.items.length - 1].no + '</span></a>';
+        }).join('') + '</div>'
+      : '<div class="sheet"><p class="empty">この学年のプリントは準備中です</p></div>';
+    app.innerHTML = '<a class="back" href="#home">' + backIcon + 'ホーム</a>' +
+      '<div class="head"><h1><span class="mark">授業プリント</span></h1></div>' +
+      '<div class="tabs" role="group" aria-label="学年">' + tabs + '</div>' + units;
+    app.querySelectorAll('.tab').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.grade = b.getAttribute('data-grade');
+        try { localStorage.setItem('grade', state.grade); } catch (e) {}
+        prints();
+      });
+    });
+  }
+
+
+  function unitView(id) {
+    var f = findUnit(id);
+    if (!f) { location.hash = 'prints'; return; }
+    var u = f.unit;
+    var chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+    function panel(it, kind, label) {
+      var n = (it.pages && it.pages[kind]) || 0, chips = '';
+      for (var s = 1; s <= n; s++) {
+        chips += '<button type="button" class="chip ' + kind + '" data-no="' + it.no + '" data-kind="' + kind + '" data-step="' + s + '">STEP' + s + '</button>';
+      }
+      return '<div class="panel ' + kind + '" data-kind="' + kind + '" hidden><span class="panel-label">' + label + '</span><div class="chips">' + chips + '</div></div>';
+    }
+    function toggleBtn(it, kind, label) {
+      if (!(it.pages && it.pages[kind])) return '<span class="btn off">' + label + ' 準備中</span>';
+      return '<button type="button" class="btn ' + kind + ' tg" data-kind="' + kind + '" aria-expanded="false">' + label + chevron + '</button>';
+    }
+    var rows = u.items.map(function (it) {
+      return '<div class="item" data-no="' + it.no + '"><div class="item-head"><span class="no">No.' + it.no + '</span><span class="topic">' + esc(it.topic || '') + '</span></div>' +
+        '<div class="row">' + toggleBtn(it, 'q', '問題') + toggleBtn(it, 'a', '解説') + '</div>' +
+        panel(it, 'q', '問題') + panel(it, 'a', '解説') + '</div>';
+    }).join('');
+    app.innerHTML = '<a class="back" href="#prints">' + backIcon + '授業プリント</a>' +
+      '<div class="head"><h1><span class="grade-label">' + esc(f.grade.name) + '</span><span class="mark">' + esc(u.name) + '</span></h1>' +
+      '</div>' +
+      '<p class="hint">「問題」か「解説」をタップして、STEPをえらぶ</p>' +
+      '<div class="sheet">' + rows + '</div>' +
+      '<p class="note">' + esc(data.updated) + ' 更新</p>';
+    app.querySelectorAll('.tg').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var item = b.closest('.item');
+        var kind = b.getAttribute('data-kind');
+        var open = b.getAttribute('aria-expanded') !== 'true';
+        item.querySelectorAll('.tg').forEach(function (o) { o.setAttribute('aria-expanded', 'false'); });
+        item.querySelectorAll('.panel').forEach(function (p) { p.hidden = true; });
+        if (open) {
+          b.setAttribute('aria-expanded', 'true');
+          item.querySelector('.panel[data-kind="' + kind + '"]').hidden = false;
+        }
+      });
+    });
+    app.querySelectorAll('.chip[data-step]').forEach(function (c) {
+      c.addEventListener('click', function () {
+        openViewer(u, +c.getAttribute('data-no'), c.getAttribute('data-kind'), +c.getAttribute('data-step'), c);
+      });
+    });
+  }
+
+  // ---- プリント表示（ページ内で1ステップだけ表示） ----
+  var viewer = document.getElementById('viewer');
+  var vImg = document.getElementById('v-img');
+  var vTitle = document.getElementById('v-title');
+  var vSteps = document.getElementById('v-steps');
+  var vScroll = document.getElementById('v-scroll');
+  var cur = null, opener = null;
+  var cache = {};
+  var vErr = document.getElementById('v-err');
+  vImg.addEventListener('error', function () { if (!viewer.hidden) { vImg.hidden = true; vErr.hidden = false; } });
+  var pushed = false;
+  // 2026-10-12：単元データに "sprite": true がある単元は，1 回分（4 STEP）を縦につないだ 1 枚（<no><q|a>.webp）を使い，
+  // CSS（aspect-ratio と object-fit / object-position）で今の STEP だけを見せる（画像の数が 4 分の 1 になる）
+  function src(no, kind, step) { return cur.unit.sprite ? cur.unit.img + '/' + no + kind + '.webp' : cur.unit.img + '/' + no + kind + step + '.webp'; }
+  function applySprite() {
+    var st = vImg.style;
+    if (!cur || !cur.unit.sprite) { st.aspectRatio = ''; st.objectFit = ''; st.objectPosition = ''; st.visibility = ''; return; }
+    var n = itemAt(curIndex()).pages[cur.kind], w = vImg.naturalWidth, h = vImg.naturalHeight;
+    if (!w) { st.visibility = 'hidden'; return; }
+    st.aspectRatio = w + ' / ' + (h / n);
+    st.objectFit = 'cover';
+    st.objectPosition = '0 ' + (n > 1 ? (cur.step - 1) / (n - 1) * 100 : 0) + '%';
+    st.visibility = '';
+  }
+  vImg.addEventListener('load', applySprite);
+  function preload(url) {
+    if (cache[url]) return;
+    var im = new Image(); im.decoding = 'async'; im.src = url; cache[url] = im;
+  }
+  function itemAt(i) { return cur.unit.items[i]; }
+  function curIndex() { for (var i = 0; i < cur.unit.items.length; i++) if (cur.unit.items[i].no === cur.no) return i; return 0; }
+  function preloadAround() {
+    var i = curIndex();
+    [i, i + 1, i - 1].forEach(function (j) {
+      var it = itemAt(j); if (!it || !it.pages) return;
+      ['q', 'a'].forEach(function (k) { for (var s = 1; s <= (it.pages[k] || 0); s++) preload(src(it.no, k, s)); });
+    });
+  }
+  function showPage() {
+    var i = curIndex(), it = itemAt(i);
+    var n = it.pages[cur.kind];
+    if (cur.step > n) cur.step = n;
+    if (cur.step < 1) cur.step = 1;
+    var label = cur.kind === 'q' ? '問題' : '解説';
+    vTitle.innerHTML = '<span class="v-no">No.' + it.no + '</span> ' + esc(it.topic || '') + '<span class="v-kind ' + cur.kind + '">' + label + ' STEP' + cur.step + '</span>';
+    var url = src(it.no, cur.kind, cur.step);
+    preload(url);
+    vErr.hidden = true; vImg.hidden = false;
+    var want = url + '#' + cur.step, changed = vImg.getAttribute('src') !== url;
+    if (vImg.getAttribute('data-want') !== want) { try { vScroll.scrollTo(0, 0); } catch (e) { vScroll.scrollTop = 0; vScroll.scrollLeft = 0; } }
+    vImg.setAttribute('data-want', want);
+    if (changed && cur.unit.sprite) vImg.style.visibility = 'hidden';
+    vImg.src = url;
+    if (!changed || !cur.unit.sprite) applySprite();
+    vImg.alt = 'No.' + it.no + ' ' + label + ' STEP' + cur.step;
+    if (vSteps.childElementCount !== n) {
+      var s = '';
+      for (var k = 1; k <= n; k++) s += '<button type="button" class="v-step" data-step="' + k + '" title="STEP' + k + '（' + k + '）">STEP' + k + '</button>';
+      vSteps.innerHTML = s;
+    }
+    vSteps.querySelectorAll('.v-step').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-step') === cur.step)); });
+    document.querySelectorAll('.v-kindbtn').forEach(function (b) {
+      var k = b.getAttribute('data-kind');
+      b.setAttribute('aria-pressed', String(k === cur.kind));
+      b.disabled = !(it.pages && it.pages[k]);
+    });
+    var ae = document.activeElement;
+    vPrev.disabled = i === 0;
+    vNext.disabled = i === cur.unit.items.length - 1;
+    if ((ae === vPrev && vPrev.disabled) || (ae === vNext && vNext.disabled)) {
+      var other = ae === vPrev ? vNext : vPrev;
+      (other.disabled ? document.getElementById('v-close') : other).focus();
+    }
+    preloadAround();
+  }
+  function goPrint(delta, step) {
+    var it = itemAt(curIndex() + delta); if (!it) return false;
+    cur.no = it.no;
+    if (!(it.pages && it.pages[cur.kind])) cur.kind = cur.kind === 'q' ? 'a' : 'q';
+    cur.step = step === 'last' ? it.pages[cur.kind] : 1;
+    showPage(); return true;
+  }
+  function goStep(delta) {
+    var n = itemAt(curIndex()).pages[cur.kind];
+    var s = cur.step + delta;
+    if (s < 1) { goPrint(-1, 'last'); return; }
+    if (s > n) { goPrint(1, 1); return; }
+    cur.step = s; showPage();
+  }
+  function toggleKind() {
+    var it = itemAt(curIndex()), k = cur.kind === 'q' ? 'a' : 'q';
+    if (it.pages && it.pages[k]) { cur.kind = k; showPage(); }
+  }
+  var vPrev = document.getElementById('v-prev');
+  var vNext = document.getElementById('v-next');
+  vPrev.addEventListener('click', function () { goPrint(-1, 1); });
+  vNext.addEventListener('click', function () { goPrint(1, 1); });
+  function openViewer(unit, no, kind, step, from) {
+    cur = { unit: unit, no: no, kind: kind, step: step }; opener = from || null;
+    vSteps.innerHTML = '';
+    showPage();
+    viewer.hidden = false;
+    app.inert = true;
+    document.body.classList.add('locked');
+    try { history.pushState({ viewer: 1 }, ''); pushed = true; } catch (e) { pushed = false; }
+    document.getElementById('v-close').focus();
+  }
+  var vFull = document.getElementById('v-full');
+  function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function syncFull() { vFull.setAttribute('aria-pressed', String(isFull())); vFull.querySelector('span').textContent = isFull() ? 'もどす' : '全画面'; }
+  function toggleFull() {
+    try {
+      if (isFull()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+      else {
+        var r = (viewer.requestFullscreen || viewer.webkitRequestFullscreen);
+        var p = r && r.call(viewer);
+        if (p && p.catch) p.catch(function () { vFull.hidden = true; });
+      }
+    } catch (e) { vFull.hidden = true; }
+  }
+  vFull.addEventListener('click', toggleFull);
+  document.addEventListener('fullscreenchange', syncFull);
+  document.addEventListener('webkitfullscreenchange', syncFull);
+  if (!(viewer.requestFullscreen || viewer.webkitRequestFullscreen)) vFull.hidden = true;
+
+  // ---- 印刷（このSTEPだけ／STEP1〜4まとめて）。画像を #print-area に並べ，印刷のときはそこだけを出す ----
+  var vPrint = document.getElementById('v-print');
+  var vPmenu = document.getElementById('v-pmenu');
+  var printArea = document.getElementById('print-area');
+  var printing = false, printSeq = 0;
+  function setPmenu(open) { vPmenu.hidden = !open; vPrint.setAttribute('aria-expanded', String(open)); }
+  function setBusy(on) {
+    printing = on;
+    vPrint.setAttribute('aria-disabled', String(on));
+    vPrint.setAttribute('aria-label', on ? '印刷の準備中' : '印刷');
+    vPrint.querySelector('span').textContent = on ? '準備中' : '印刷';
+  }
+  function clearPrint() { document.body.classList.remove('printing'); printArea.innerHTML = ''; }
+  // ビューアを閉じたら，読み込み中の印刷は取りやめる
+  function cancelPrint() { printSeq++; if (printing) setBusy(false); clearPrint(); }
+  function loadImg(url) {
+    return new Promise(function (ok, ng) {
+      var im = cache[url];
+      if (im && im.complete && im.naturalWidth) { ok(im); return; }
+      im = new Image();
+      im.onload = function () { cache[url] = im; ok(im); };
+      im.onerror = ng;
+      im.src = url;
+    });
+  }
+  function printNow(all) {
+    if (printing) return;
+    var job = ++printSeq;
+    var unit = cur.unit, it = itemAt(curIndex()), kind = cur.kind, n = it.pages[kind], parts = unit.sprite ? n : 1;
+    var steps = [];
+    if (all) { for (var s = 1; s <= n; s++) steps.push(s); } else steps.push(cur.step);
+    var urls = steps.map(function (s) { return src(it.no, kind, s); });
+    var uniq = urls.filter(function (u, i) { return urls.indexOf(u) === i; });
+    clearPrint(); setBusy(true);
+    Promise.all(uniq.map(loadImg)).then(function (ims) {
+      if (job !== printSeq) return;
+      var byUrl = {};
+      uniq.forEach(function (u, i) { byUrl[u] = ims[i]; });
+      printArea.innerHTML = steps.map(function (s, i) {
+        // ビューアと同じく，画像を 1 STEP 分の縦横比にして object-position で今の STEP の位置を見せる
+        var im = byUrl[urls[i]], w = im.naturalWidth, h = im.naturalHeight / parts, k = unit.sprite ? s - 1 : 0;
+        return '<div class="pp' + (w > h ? ' land' : '') + '"><img alt="" src="' + esc(urls[i]) + '" style="width:min(100%,calc(var(--ph) * ' + (w / h).toFixed(5) + '));aspect-ratio:' + w + ' / ' + h +
+          ';object-position:0 ' + (parts > 1 ? k / (parts - 1) * 100 : 0) + '%"></div>';
+      }).join('');
+      var shown = Array.prototype.map.call(printArea.querySelectorAll('img'), function (im) { return im.decode ? im.decode().catch(function () {}) : null; });
+      return Promise.all(shown).then(function () {
+        if (job !== printSeq || viewer.hidden) return;
+        if (isFull()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+        document.body.classList.add('printing');
+        setTimeout(function () {
+          if (job !== printSeq || viewer.hidden) return;
+          window.print();
+          setBusy(false);
+        }, 60);
+      });
+    }).catch(function () {
+      if (job !== printSeq) return;
+      setBusy(false); clearPrint();
+      alert('印刷する画像を読み込めませんでした。通信を確認して、もう一度おしてください。');
+    });
+  }
+  vPrint.addEventListener('click', function () {
+    if (printing) return;
+    var open = vPmenu.hidden;
+    setPmenu(open);
+    if (open) vPmenu.querySelector('button').focus();
+  });
+  vPmenu.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-print]'); if (!b) return;
+    setPmenu(false); vPrint.focus();
+    printNow(b.getAttribute('data-print') === 'all');
+  });
+  document.addEventListener('click', function (e) { if (!vPmenu.hidden && !e.target.closest('.v-pwrap')) setPmenu(false); });
+  // Tab でメニューの外に出たら閉じる
+  vPrint.parentNode.addEventListener('focusout', function (e) { if (e.relatedTarget && !vPrint.parentNode.contains(e.relatedTarget)) setPmenu(false); });
+
+  function hideViewer() {
+    setPmenu(false); cancelPrint();
+    if (isFull()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+    viewer.hidden = true;
+    app.inert = false;
+    document.body.classList.remove('locked');
+    // 最後に見ていた番号の行に戻る
+    var row = cur && app.querySelector('.item[data-no="' + cur.no + '"]');
+    var target = row && (row.querySelector('.tg[data-kind="' + cur.kind + '"]') || row.querySelector('.tg'));
+    if (row) row.scrollIntoView({ block: 'center' });
+    var f = target || opener;
+    function doFocus() { if (f && document.contains(f) && viewer.hidden) f.focus({ preventScroll: true }); }
+    doFocus();
+    setTimeout(doFocus, 200);
+  }
+  function closeViewer() {
+    if (pushed) { pushed = false; try { history.back(); return; } catch (e) {} }
+    hideViewer();
+  }
+  window.addEventListener('popstate', function () { if (!viewer.hidden) { pushed = false; hideViewer(); } });
+  document.getElementById('v-close').addEventListener('click', closeViewer);
+  vSteps.addEventListener('click', function (e) {
+    var b = e.target.closest('.v-step'); if (!b) return;
+    cur.step = +b.getAttribute('data-step'); showPage();
+  });
+  document.querySelectorAll('.v-kindbtn').forEach(function (b) {
+    b.addEventListener('click', function () { cur.kind = b.getAttribute('data-kind'); showPage(); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (viewer.hidden) return;
+    // ビューアを開いているときの Ctrl+P は，見ている STEP を A4 1 枚で印刷する
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && (e.key === 'p' || e.key === 'P')) { e.preventDefault(); setPmenu(false); printNow(false); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!vPmenu.hidden) {
+      if (e.key === 'Escape') { e.preventDefault(); setPmenu(false); vPrint.focus(); return; }
+      if (vPmenu.contains(document.activeElement)) return;
+    }
+    var k = e.key, done = true;
+    if (k === 'ArrowRight') goStep(1);
+    else if (k === 'ArrowLeft') goStep(-1);
+    else if (k === 'ArrowDown' || k === 'PageDown') goPrint(1, 1);
+    else if (k === 'ArrowUp' || k === 'PageUp') goPrint(-1, 1);
+    else if (k === ' ' || k === 'Spacebar') toggleKind();
+    else if (k === 'q' || k === 'Q') { cur.kind = 'q'; showPage(); }
+    else if (k === 'a' || k === 'A') { if (itemAt(curIndex()).pages.a) { cur.kind = 'a'; showPage(); } }
+    else if (/^[1-9]$/.test(k) && +k <= itemAt(curIndex()).pages[cur.kind]) { cur.step = +k; showPage(); }
+    else if (k === 'f' || k === 'F') { if (!vFull.hidden) toggleFull(); }
+    else if (k === 'p' || k === 'P') { setPmenu(true); vPmenu.querySelector('button').focus(); }
+    else if (k === 'Escape') { if (!isFull()) closeViewer(); }
+    else done = false;
+    if (done) e.preventDefault();
+  });
+
+  function route() {
+    if (!viewer.hidden) { pushed = false; hideViewer(); }
+    var h = location.hash.replace('#', '');
+    if (h === 'prints') prints();
+    else if (h.indexOf('u-') === 0) unitView(h.slice(2));
+    else home();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
