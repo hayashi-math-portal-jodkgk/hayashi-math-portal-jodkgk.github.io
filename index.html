@@ -201,6 +201,18 @@ body.locked { overflow: hidden; }
 .v-pmenu button:hover { background: color-mix(in srgb, var(--marker) 30%, var(--card)); }
 .v-full[aria-disabled="true"] { cursor: progress; opacity: .6; }
 @media (max-width: 480px) { .v-full span { display: none; } .v-full { padding: 0 11px; } }
+/* 2026-10-15：スクリーンモード（S キー）。授業でスクリーンに映すとき，ボタン類を消してプリントだけを画面いっぱいに出す */
+.v-sexit { display: none; }
+.viewer.screen { background: #FFFFFF; }
+.viewer.screen:focus { outline: none; }
+.viewer.screen .v-bar, .viewer.screen .v-nav, .viewer.screen .v-keys, .viewer.screen .v-rotate { display: none; }
+.viewer.screen .v-scroll { display: flex; overflow: hidden; padding: 0; align-items: center; justify-content: center; }
+.viewer.screen .v-scroll img { max-width: 100%; max-height: 100%; width: auto; height: auto; border: 0; border-radius: 0; }
+.viewer.screen .v-scroll.zoomed { overflow: auto; align-items: flex-start; justify-content: flex-start; }
+.viewer.screen .v-scroll.zoomed img { max-width: none; max-height: none; height: auto; }
+.viewer.screen.idle, .viewer.screen.idle * { cursor: none; }
+.viewer.screen .v-sexit { display: inline-flex; position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: 10px; z-index: 3; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid #1E2A4A; background: rgba(255, 255, 255, .9); color: #1E2A4A; font: 700 15px var(--font-body); cursor: pointer; opacity: 1; transition: opacity .3s; }
+.viewer.screen.idle .v-sexit:not(:focus-visible) { opacity: 0; pointer-events: none; }
 #print-area { display: none; }
 @media print {
   /* プリントは横長なので A4 横（縦長の画像なら A4 縦）。1 STEP を 1 枚に収める */
@@ -1129,7 +1141,7 @@ body.locked { overflow: hidden; }
 
 <div class="wrap" id="app"></div>
 
-<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="v-title" hidden>
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="v-title" tabindex="-1" hidden>
   <div class="v-bar">
     <p class="v-title" id="v-title" aria-live="polite"></p>
     <div class="v-switch" role="group" aria-label="問題と解説">
@@ -1143,6 +1155,7 @@ body.locked { overflow: hidden; }
         <button type="button" data-print="all">STEP1〜4 まとめて<small>この回の問題（解説）を全部</small></button>
       </span>
     </span>
+    <button type="button" class="v-full" id="v-screen" title="スクリーン（S）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/></svg><span>スクリーン</span></button>
     <button type="button" class="v-full" id="v-full" aria-pressed="false" title="全画面（F）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>全画面</span></button>
     <button type="button" class="v-close" id="v-close" aria-label="とじる"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
@@ -1153,7 +1166,8 @@ body.locked { overflow: hidden; }
     <div class="v-steps" id="v-steps" role="group" aria-label="STEP"></div>
     <button type="button" class="v-pn" id="v-next" title="次のプリント（↓）"><span>次のプリント</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
-  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>P</kbd> 問題STEP1〜4印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
+  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>P</kbd> 問題STEP1〜4印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>S</kbd> スクリーン　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
+  <button type="button" class="v-sexit" id="v-sexit">もどる（Esc）</button>
 </div>
 
 <div id="print-area" aria-hidden="true"></div>
@@ -1486,6 +1500,50 @@ body.locked { overflow: hidden; }
   document.addEventListener('webkitfullscreenchange', syncFull);
   if (!(viewer.requestFullscreen || viewer.webkitRequestFullscreen)) vFull.hidden = true;
 
+  // ---- スクリーンモード（S）：ボタン類を消してプリントだけを出す。入るときブラウザの全画面にもする ----
+  var vScreen = document.getElementById('v-screen');
+  var vSexit = document.getElementById('v-sexit');
+  var screenOn = false, screenFull = false, idleTimer = 0;
+  function poke() {
+    if (!screenOn) return;
+    viewer.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { viewer.classList.add('idle'); }, 2000);
+  }
+  function setScreen(on) {
+    if (on === screenOn) return;
+    screenOn = on;
+    resetZoom(); setPmenu(false);
+    viewer.classList.toggle('screen', on);
+    clearTimeout(idleTimer);
+    if (on) {
+      viewer.classList.add('idle');
+      viewer.focus({ preventScroll: true });
+      screenFull = false;
+      if (!isFull()) {
+        try {
+          var r = (viewer.requestFullscreen || viewer.webkitRequestFullscreen);
+          var p = r && r.call(viewer);
+          screenFull = !!r;
+          if (p && p.catch) p.catch(function () { screenFull = false; });
+        } catch (e) { screenFull = false; }
+      }
+    } else {
+      viewer.classList.remove('idle');
+      if (screenFull && isFull()) { try { var q = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (q && q.catch) q.catch(function () {}); } catch (e) {} }
+      screenFull = false;
+      if (!viewer.hidden) vScreen.focus({ preventScroll: true });
+    }
+  }
+  vScreen.addEventListener('click', function () { setScreen(true); });
+  vSexit.addEventListener('click', function () { setScreen(false); });
+  viewer.addEventListener('pointermove', poke);
+  viewer.addEventListener('pointerdown', poke);
+  // Esc でブラウザの全画面が解かれたら，スクリーンモードも終える
+  function onFullChange() { if (screenOn && screenFull && !isFull()) { screenFull = false; setScreen(false); } }
+  document.addEventListener('fullscreenchange', onFullChange);
+  document.addEventListener('webkitfullscreenchange', onFullChange);
+
   // ---- 印刷（このSTEPだけ／STEP1〜4まとめて）。画像を #print-area に並べ，印刷のときはそこだけを出す ----
   var vPrint = document.getElementById('v-print');
   var vPmenu = document.getElementById('v-pmenu');
@@ -1565,6 +1623,7 @@ body.locked { overflow: hidden; }
   vPrint.parentNode.addEventListener('focusout', function (e) { if (e.relatedTarget && !vPrint.parentNode.contains(e.relatedTarget)) setPmenu(false); });
 
   function hideViewer() {
+    screenFull = false; setScreen(false);
     resetZoom();
     setPmenu(false); cancelPrint();
     if (isFull()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
@@ -1610,12 +1669,13 @@ body.locked { overflow: hidden; }
     else if (k === ' ' || k === 'Spacebar') toggleKind();
     else if (k === 'q' || k === 'Q') { cur.kind = 'q'; showPage(); }
     else if (k === 'a' || k === 'A') { if (itemAt(curIndex()).pages.a) { cur.kind = 'a'; showPage(); } }
-    else if (k === 'f' || k === 'F') { if (!vFull.hidden) toggleFull(); }
+    else if (k === 's' || k === 'S') setScreen(!screenOn);
+    else if (k === 'f' || k === 'F') { if (!vFull.hidden && !screenOn) toggleFull(); }
     else if (k === '+' || k === '=' || k === ';') zoomTo(zoom * 1.5);
     else if (k === '-' || k === '_') zoomTo(zoom / 1.5);
     else if (k === '0') resetZoom();
     else if (k === 'p' || k === 'P') { setPmenu(false); printNow(true, 'q'); }
-    else if (k === 'Escape') { if (!isFull()) closeViewer(); }
+    else if (k === 'Escape') { if (screenOn) setScreen(false); else if (!isFull()) closeViewer(); }
     else done = false;
     if (done) e.preventDefault();
   });
