@@ -1134,7 +1134,7 @@ body.locked { overflow: hidden; }
       <button type="button" class="v-kindbtn" data-kind="a">解説</button>
     </div>
     <span class="v-pwrap">
-      <button type="button" class="v-full" id="v-print" aria-label="印刷" aria-expanded="false" aria-controls="v-pmenu" title="印刷（P）"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span>印刷</span></button>
+      <button type="button" class="v-full" id="v-print" aria-label="印刷" aria-expanded="false" aria-controls="v-pmenu" title="印刷"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span>印刷</span></button>
       <span class="v-pmenu" id="v-pmenu" role="group" aria-label="印刷するはんい" hidden>
         <button type="button" data-print="step">このSTEPだけ<small>いま見ているページを 1 枚</small></button>
         <button type="button" data-print="all">STEP1〜4 まとめて<small>この回の問題（解説）を全部</small></button>
@@ -1150,7 +1150,7 @@ body.locked { overflow: hidden; }
     <div class="v-steps" id="v-steps" role="group" aria-label="STEP"></div>
     <button type="button" class="v-pn" id="v-next" title="次のプリント（↓）"><span>次のプリント</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
-  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>1</kbd>〜<kbd>4</kbd> STEP　<kbd>P</kbd> 印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
+  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>1</kbd>〜<kbd>4</kbd> STEP　<kbd>P</kbd> 問題STEP1〜4印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
 </div>
 
 <div id="print-area" aria-hidden="true"></div>
@@ -1502,10 +1502,12 @@ body.locked { overflow: hidden; }
       im.src = url;
     });
   }
-  function printNow(all) {
+  // kind：'q' のように指定すると，見ているのが解説でも問題を印刷する（P キー）
+  function printNow(all, kind) {
     if (printing) return;
     var job = ++printSeq;
-    var unit = cur.unit, it = itemAt(curIndex()), kind = cur.kind, n = it.pages[kind], parts = unit.sprite ? n : 1;
+    var unit = cur.unit, it = itemAt(curIndex()), n;
+    kind = kind && it.pages[kind] ? kind : cur.kind; n = it.pages[kind], parts = unit.sprite ? n : 1;
     var steps = [];
     if (all) { for (var s = 1; s <= n; s++) steps.push(s); } else steps.push(cur.step);
     var urls = steps.map(function (s) { return src(it.no, kind, s); });
@@ -1604,7 +1606,7 @@ body.locked { overflow: hidden; }
     else if (k === '+' || k === '=' || k === ';') zoomTo(zoom * 1.5);
     else if (k === '-' || k === '_') zoomTo(zoom / 1.5);
     else if (k === '0') resetZoom();
-    else if (k === 'p' || k === 'P') { setPmenu(true); vPmenu.querySelector('button').focus(); }
+    else if (k === 'p' || k === 'P') { setPmenu(false); printNow(true, 'q'); }
     else if (k === 'Escape') { if (!isFull()) closeViewer(); }
     else done = false;
     if (done) e.preventDefault();
