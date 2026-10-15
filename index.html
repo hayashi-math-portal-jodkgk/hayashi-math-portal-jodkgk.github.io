@@ -106,7 +106,8 @@ h1, h2 { text-wrap: balance; margin: 0; }
 .units { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 20px; }
 .unit { text-decoration: none; background: var(--card); border: 2px solid var(--ink); border-radius: 14px; padding: 20px 22px; box-shadow: 4px 4px 0 var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 84px; }
 .unit-name { font-size: 22px; font-weight: 900; white-space: nowrap; }
-.unit-count { white-space: nowrap; font-family: var(--font-num); font-size: 14px; color: var(--ink-soft); }
+.unit-count { white-space: nowrap; font-family: var(--font-num); font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+.unit-count small { font-size: 14px; font-weight: 600; color: var(--ink-soft); margin-right: 1px; }
 .summary-btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; border: 2px solid var(--ink); border-radius: 999px; background: var(--marker); color: #1E2A4A; text-decoration: none; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); }
 .sheet { background: var(--card); border: 2px solid var(--ink); border-radius: 16px; padding: 8px 22px; box-shadow: 6px 6px 0 var(--ink); display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); column-gap: 32px; }
 .row { display: flex; align-items: center; gap: 10px; padding-block: 8px; border-bottom: 1px dashed var(--rule); min-width: 0; }
@@ -1206,7 +1207,7 @@ body.locked { overflow: hidden; }
     var grade = data.grades.filter(function (g) { return g.id === state.grade; })[0] || data.grades[0];
     var units = grade.units.length
       ? '<div class="units">' + grade.units.map(function (u) {
-          return '<a class="unit" href="#u-' + esc(u.id) + '"><span class="unit-name">' + esc(u.name) + '</span><span class="unit-count">No.' + u.items[0].no + '–' + u.items[u.items.length - 1].no + '</span></a>';
+          return '<a class="unit" href="#u-' + esc(u.id) + '"><span class="unit-name">' + esc(u.name) + '</span><span class="unit-count"><small>No.</small>' + u.items[0].no + '–' + u.items[u.items.length - 1].no + '</span></a>';
         }).join('') + '</div>'
       : '<div class="sheet"><p class="empty">この学年のプリントは準備中です</p></div>';
     app.innerHTML = '<a class="back" href="#home">' + backIcon + 'ホーム</a>' +
