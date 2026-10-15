@@ -1525,7 +1525,8 @@ body.locked { overflow: hidden; }
           var r = (viewer.requestFullscreen || viewer.webkitRequestFullscreen);
           var p = r && r.call(viewer);
           screenFull = !!r;
-          if (p && p.catch) p.catch(function () { screenFull = false; });
+          // 全画面になる前にスクリーンモードを出たときは，全画面も戻す
+          if (p && p.then) p.then(function () { if (!screenOn && isFull()) { try { var q = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (q && q.catch) q.catch(function () {}); } catch (e) {} } }, function () { screenFull = false; });
         } catch (e) { screenFull = false; }
       }
     } else {
@@ -1540,7 +1541,7 @@ body.locked { overflow: hidden; }
   viewer.addEventListener('pointermove', poke);
   viewer.addEventListener('pointerdown', poke);
   // Esc でブラウザの全画面が解かれたら，スクリーンモードも終える
-  function onFullChange() { if (screenOn && screenFull && !isFull()) { screenFull = false; setScreen(false); } }
+  function onFullChange() { if (screenOn && !isFull()) { screenFull = false; setScreen(false); } }
   document.addEventListener('fullscreenchange', onFullChange);
   document.addEventListener('webkitfullscreenchange', onFullChange);
 
