@@ -1150,7 +1150,7 @@ body.locked { overflow: hidden; }
     <div class="v-steps" id="v-steps" role="group" aria-label="STEP"></div>
     <button type="button" class="v-pn" id="v-next" title="次のプリント（↓）"><span>次のプリント</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
-  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>1</kbd>〜<kbd>4</kbd> STEP　<kbd>P</kbd> 問題STEP1〜4印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
+  <p class="v-keys" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> STEP　<kbd>↑</kbd><kbd>↓</kbd> 前・次のプリント　<kbd>Space</kbd> 問題⇄解説　<kbd>Q</kbd> 問題　<kbd>A</kbd> 解説　<kbd>P</kbd> 問題STEP1〜4印刷　<kbd>+</kbd><kbd>-</kbd> 拡大　<kbd>F</kbd> 全画面　<kbd>Esc</kbd> とじる</p>
 </div>
 
 <div id="print-area" aria-hidden="true"></div>
@@ -1409,7 +1409,7 @@ body.locked { overflow: hidden; }
     vImg.alt = 'No.' + it.no + ' ' + label + ' STEP' + cur.step;
     if (vSteps.childElementCount !== n) {
       var s = '';
-      for (var k = 1; k <= n; k++) s += '<button type="button" class="v-step" data-step="' + k + '" title="STEP' + k + '（' + k + '）">STEP' + k + '</button>';
+      for (var k = 1; k <= n; k++) s += '<button type="button" class="v-step" data-step="' + k + '" title="STEP' + k + '">STEP' + k + '</button>';
       vSteps.innerHTML = s;
     }
     vSteps.querySelectorAll('.v-step').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-step') === cur.step)); });
@@ -1601,7 +1601,6 @@ body.locked { overflow: hidden; }
     else if (k === ' ' || k === 'Spacebar') toggleKind();
     else if (k === 'q' || k === 'Q') { cur.kind = 'q'; showPage(); }
     else if (k === 'a' || k === 'A') { if (itemAt(curIndex()).pages.a) { cur.kind = 'a'; showPage(); } }
-    else if (/^[1-9]$/.test(k) && +k <= itemAt(curIndex()).pages[cur.kind]) { cur.step = +k; showPage(); }
     else if (k === 'f' || k === 'F') { if (!vFull.hidden) toggleFull(); }
     else if (k === '+' || k === '=' || k === ';') zoomTo(zoom * 1.5);
     else if (k === '-' || k === '_') zoomTo(zoom / 1.5);
