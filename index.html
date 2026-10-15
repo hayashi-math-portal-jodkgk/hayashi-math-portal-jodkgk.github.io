@@ -186,6 +186,9 @@ body.locked { overflow: hidden; }
   .v-scroll { display: block; overflow: auto; -webkit-overflow-scrolling: touch; }
   .v-scroll img { max-width: none; max-height: none; width: 100%; }
 }
+/* ビューアの上ではページ全体の拡大をさせない（画像の拡大を使う）。ただしページ全体が拡大されたまま開いたときは，指で戻せるようにする（.pz） */
+.viewer { touch-action: pan-x pan-y; }
+.viewer.pz, .viewer.pz .v-scroll { touch-action: auto; }
 /* 拡大中（2 本指・ピンチ・ダブルタップ）：画像を大きくしてスクロールで動かす。margin:auto で小さい向きは中央に */
 .v-scroll.zoomed { display: flex; overflow: auto; align-items: flex-start; justify-content: flex-start; cursor: grab; }
 .v-scroll.zoomed.dragging { cursor: grabbing; }
@@ -1323,11 +1326,13 @@ body.locked { overflow: hidden; }
     var r = vImg.getBoundingClientRect();
     return [Math.max(0, Math.min(1, (x - r.left) / r.width)), Math.max(0, Math.min(1, (y - r.top) / r.height))];
   }
+  function syncPZ() { viewer.classList.toggle('pz', !!window.visualViewport && visualViewport.scale > 1.01); }
+  if (window.visualViewport) visualViewport.addEventListener('resize', syncPZ);
   var pinch = null;
   function tMid(t) { return [(t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2]; }
   function tDist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY) || 1; }
   vScroll.addEventListener('touchstart', function (e) {
-    if (e.touches.length !== 2) return;
+    if (e.touches.length !== 2 || viewer.classList.contains('pz')) return;
     var m = tMid(e.touches);
     pinch = { d: tDist(e.touches), z: zoom, f: imgFrac(m[0], m[1]) };
     down = null; tapAt = 0;
@@ -1345,7 +1350,7 @@ body.locked { overflow: hidden; }
   vScroll.addEventListener('touchcancel', endPinch);
   // Chromebook のタッチパッドのピンチ・Ctrl+マウスホイールは Ctrl+ホイールとして届く（ブラウザ全体の拡大にしない）
   viewer.addEventListener('wheel', function (e) {
-    if (!e.ctrlKey || viewer.hidden) return;
+    if (!e.ctrlKey || viewer.hidden || viewer.classList.contains('pz')) return;
     e.preventDefault();
     var k = Math.exp(-e.deltaY * (e.deltaMode ? 0.33 : 0.01));
     zoomTo(zoom * Math.max(0.8, Math.min(1.25, k)), e.clientX, e.clientY);
@@ -1355,6 +1360,9 @@ body.locked { overflow: hidden; }
   vImg.addEventListener('dragstart', function (e) { e.preventDefault(); });
   vScroll.addEventListener('pointerdown', function (e) {
     if (!e.isPrimary || e.button !== 0) { down = null; return; }
+    // スクロールバーの上（溝・矢印）を押したときは，ダブルクリック・ドラッグとして数えない
+    var b = vScroll.getBoundingClientRect();
+    if (e.clientX - b.left >= vScroll.clientLeft + vScroll.clientWidth || e.clientY - b.top >= vScroll.clientTop + vScroll.clientHeight) { down = null; tapAt = 0; return; }
     down = { x: e.clientX, y: e.clientY, sl: vScroll.scrollLeft, st: vScroll.scrollTop, moved: false, id: e.pointerId, mouse: e.pointerType === 'mouse' };
     if (down.mouse && zoom > 1) { try { vScroll.setPointerCapture(e.pointerId); } catch (er) {} vScroll.classList.add('dragging'); }
   });
@@ -1453,6 +1461,7 @@ body.locked { overflow: hidden; }
     cur = { unit: unit, no: no, kind: kind, step: step }; opener = from || null;
     vSteps.innerHTML = '';
     showPage();
+    syncPZ();
     viewer.hidden = false;
     app.inert = true;
     document.body.classList.add('locked');
@@ -1506,8 +1515,8 @@ body.locked { overflow: hidden; }
   function printNow(all, kind) {
     if (printing) return;
     var job = ++printSeq;
-    var unit = cur.unit, it = itemAt(curIndex()), n;
-    kind = kind && it.pages[kind] ? kind : cur.kind; n = it.pages[kind], parts = unit.sprite ? n : 1;
+    var unit = cur.unit, it = itemAt(curIndex()), n, parts;
+    kind = kind && it.pages[kind] ? kind : cur.kind; n = it.pages[kind]; parts = unit.sprite ? n : 1;
     var steps = [];
     if (all) { for (var s = 1; s <= n; s++) steps.push(s); } else steps.push(cur.step);
     var urls = steps.map(function (s) { return src(it.no, kind, s); });
