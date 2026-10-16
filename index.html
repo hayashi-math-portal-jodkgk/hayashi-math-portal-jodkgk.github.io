@@ -1442,7 +1442,7 @@ body.locked { overflow: hidden; }
 
   function unitView(id) {
     var f = findUnit(id);
-    if (!f) { location.hash = 'prints'; return; }
+    if (!f) { go('prints'); return; }
     var u = f.unit;
     var chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
     function panel(it, kind, label) {
@@ -1832,7 +1832,11 @@ body.locked { overflow: hidden; }
     if (pushed) { pushed = false; try { history.back(); return; } catch (e) {} }
     hideViewer();
   }
-  window.addEventListener('popstate', function () { if (!viewer.hidden) { pushed = false; hideViewer(); } });
+  window.addEventListener('popstate', function (e) {
+    if (!viewer.hidden) { pushed = false; hideViewer(); return; }
+    // Apps Script 版：「戻る」「進む」で前の画面にもどす
+    if (gas && !(e.state && e.state.viewer)) { gasHash = e.state && e.state.h != null ? e.state.h : location.hash.replace('#', ''); route(); }
+  });
   document.getElementById('v-close').addEventListener('click', closeViewer);
   vSteps.addEventListener('click', function (e) {
     var b = e.target.closest('.v-step'); if (!b) return;
@@ -1868,15 +1872,35 @@ body.locked { overflow: hidden; }
     if (done) e.preventDefault();
   });
 
+  // 2026-10-16：Apps Script 版（gas）では，ページの中のリンク（#prints・#u-○○）を押しても画面が切りかわらないことがあった。
+  // そこで Apps Script 版のときは，リンクを押したら自分で画面を切りかえる（「戻る」は history の state で戻す）
+  var gasHash = null;
+  function hashNow() { return gasHash != null ? gasHash : location.hash.replace('#', ''); }
+  function go(h) {
+    if (!gas) { location.hash = h; return; }
+    gasHash = h;
+    try { history.pushState({ h: h }, '', '#' + h); } catch (e) {}
+    route();
+  }
+  if (gas) {
+    try { history.replaceState({ h: hashNow() }, ''); } catch (e) {}
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a || e.defaultPrevented || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      go(a.getAttribute('href').slice(1));
+    });
+  }
+
   function route() {
     if (!viewer.hidden) { pushed = false; hideViewer(); }
-    var h = location.hash.replace('#', '');
+    var h = hashNow();
     if (h === 'prints') prints();
     else if (h.indexOf('u-') === 0) unitView(h.slice(2));
     else home();
     window.scrollTo(0, 0);
   }
-  window.addEventListener('hashchange', route);
+  window.addEventListener('hashchange', function () { if (!gas) route(); });
   route();
 })();
 </script>
