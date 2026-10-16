@@ -1835,7 +1835,10 @@ body.locked { overflow: hidden; }
   window.addEventListener('popstate', function (e) {
     if (!viewer.hidden) { pushed = false; hideViewer(); return; }
     // Apps Script 版：「戻る」「進む」で前の画面にもどす
-    if (gas && !(e.state && e.state.viewer)) { gasHash = e.state && e.state.h != null ? e.state.h : location.hash.replace('#', ''); route(); }
+    // （ビューアの記録には h がないが，URL の # は開いていた画面のまま）。同じ画面なら描き直さない
+    if (!gas) return;
+    var h = e.state && e.state.h != null ? e.state.h : location.hash.replace('#', '');
+    if (h !== hashNow()) { gasHash = h; route(); }
   });
   document.getElementById('v-close').addEventListener('click', closeViewer);
   vSteps.addEventListener('click', function (e) {
@@ -1878,6 +1881,7 @@ body.locked { overflow: hidden; }
   function hashNow() { return gasHash != null ? gasHash : location.hash.replace('#', ''); }
   function go(h) {
     if (!gas) { location.hash = h; return; }
+    if (h === hashNow()) return;
     gasHash = h;
     try { history.pushState({ h: h }, '', '#' + h); } catch (e) {}
     route();
