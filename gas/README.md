@@ -49,3 +49,16 @@
 - **ページが「準備中です」のまま**：1 回目の取りこみが終わっていません。`syncNow` を実行して、実行ログを見ます。
 - **画像だけ出ない**：`Code.gs` の `IMG_URL` を `'https://drive.google.com/thumbnail?id={id}&sz=w1600'` に変えて保存し、`syncNow` を実行します。
 - **10 分たっても更新されない**：左の「トリガー」に `sync`（10 分ごと）があるか確かめます。なければ `setup` をもう一度実行します。
+
+## clasp で送るとき（パソコンの Claude Code）
+
+計算王と同じように clasp で `Code.gs` を送れます。
+
+1. `site/gas/` に `.clasp.json` を作る（GitHub には上げない。`.gitignore` に入っています）
+   ```json
+   {"scriptId": "<Apps Script のプロジェクトの URL の /projects/ と /edit のあいだ>", "rootDir": "."}
+   ```
+2. `site/gas/` で `clasp push`（`Code.gs` と `appsscript.json` が送られる。README.md は送られない）
+3. 公開中のウェブアプリを新しくする：`clasp deployments` で ID を調べて `clasp deploy -i <その ID>`（URL は変わらない）
+
+はじめの `setup` の実行と許可は、エディタで 1 回だけ行います（clasp からはできません）。
