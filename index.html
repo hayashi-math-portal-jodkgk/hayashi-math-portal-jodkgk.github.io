@@ -1504,7 +1504,11 @@ body.locked { overflow: hidden; }
   var pushed = false;
   // 2026-10-12：単元データに "sprite": true がある単元は，1 回分（4 STEP）を縦につないだ 1 枚（<no><q|a>.webp）を使い，
   // CSS（aspect-ratio と object-fit / object-position）で今の STEP だけを見せる（画像の数が 4 分の 1 になる）
-  function src(no, kind, step) { return cur.unit.sprite ? cur.unit.img + '/' + no + kind + '.webp' : cur.unit.img + '/' + no + kind + step + '.webp'; }
+  // 2026-10-16：学校の端末では github.io がフィルタで止められるので，Google Apps Script（gas/）からも同じページを出している。
+  // そのときは window.GAS（Apps Script が入れる）を見て，画像を Google ドライブの写しから読む
+  var gas = window.GAS || null;
+  function imgUrl(p) { return !gas ? p : gas.img[p] ? gas.url.replace('{id}', gas.img[p]) : gas.site + p; }
+  function src(no, kind, step) { return imgUrl(cur.unit.sprite ? cur.unit.img + '/' + no + kind + '.webp' : cur.unit.img + '/' + no + kind + step + '.webp'); }
   function applySprite() {
     var st = vImg.style;
     if (!cur || !cur.unit.sprite) { st.aspectRatio = ''; st.objectFit = ''; st.objectPosition = ''; st.visibility = ''; return; }
